@@ -1,0 +1,5 @@
+This test tests whether
+
+1) routes are correctly switched from best to second best when a link goes down in distance vector and link state
+
+2) routes are correctly switched back to best when a link comes back up.

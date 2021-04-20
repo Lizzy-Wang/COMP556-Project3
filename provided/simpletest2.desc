@@ -1,0 +1,4 @@
+Tests whether
+
+1) triggered updates are sent for both distance vector and link state
+

@@ -1,0 +1,8 @@
+Simply two nodes sending data packets at periodic intervals to each other. 
+
+Tests whether 
+
+1) ping and pong packets are being sent, 
+2) periodic updates are being sent
+3) data packets are being sent
+
