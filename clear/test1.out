@@ -1,0 +1,202 @@
+Step 1: Begin Simulator Initialization...
+node: 1
+node: 2
+link: 1 2 10 0.000000
+Reading events...
+Line being read is: 1.00    xmit (2,1)
+Line being read is: 50.00 end
+Simulator Initialization complete.
+DEBUG: periodic_send_DV on router 2
+DEBUG: send DV on router 2
+DEBUG: periodic_send_DV on router 1
+DEBUG: send DV on router 1
+Step 2: Simulator beginning to run...
+time = 0 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+time = 0 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+time = 0.01 Event_Recv_Pkt_On_Node 1 packet type is PING
+time = 0.01 Event_Recv_Pkt_On_Node 2 packet type is PING
+time = 0.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
+time = 0.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
+time = 0.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: recv Pong new link
+DEBUG: send DV on router 2
+time = 0.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
+DEBUG: recv Pong new link
+DEBUG: send DV on router 1
+time = 0.02 Event_Xmit_Pkt_On_Link (2,1) packet type is DV
+time = 0.02 Event_Xmit_Pkt_On_Link (1,2) packet type is DV
+time = 0.03 Event_Recv_Pkt_On_Node 1 packet type is DV
+time = 0.03 Event_Recv_Pkt_On_Node 2 packet type is DV
+time = 1 Event_Alarm on node 2
+time = 1 Event_Xmit_Data_Pkt source node 2 destination node 1 packet type is DATA
+DEBUG: recv data on router 2
+time = 1 Event_Alarm on node 1
+time = 1 Event_Xmit_Pkt_On_Link (2,1) packet type is DATA
+time = 1.01 Event_Recv_Pkt_On_Node 1 packet type is DATA
+DEBUG: recv data on router 1
+time = 2 Event_Alarm on node 2
+time = 2 Event_Alarm on node 1
+time = 3 Event_Alarm on node 2
+time = 3 Event_Alarm on node 1
+time = 4 Event_Alarm on node 2
+time = 4 Event_Alarm on node 1
+time = 5 Event_Alarm on node 2
+time = 5 Event_Alarm on node 1
+time = 6 Event_Alarm on node 2
+time = 6 Event_Alarm on node 1
+time = 7 Event_Alarm on node 2
+time = 7 Event_Alarm on node 1
+time = 8 Event_Alarm on node 2
+time = 8 Event_Alarm on node 1
+time = 9 Event_Alarm on node 2
+time = 9 Event_Alarm on node 1
+time = 10 Event_Alarm on node 2
+time = 10 Event_Alarm on node 2
+time = 10 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+time = 10 Event_Alarm on node 1
+time = 10 Event_Alarm on node 1
+time = 10 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+time = 10.01 Event_Recv_Pkt_On_Node 1 packet type is PING
+time = 10.01 Event_Recv_Pkt_On_Node 2 packet type is PING
+time = 10.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
+time = 10.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
+time = 10.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: recv Pong old link
+time = 10.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
+DEBUG: recv Pong old link
+time = 11 Event_Alarm on node 2
+time = 11 Event_Alarm on node 1
+time = 12 Event_Alarm on node 2
+time = 12 Event_Alarm on node 1
+time = 13 Event_Alarm on node 2
+time = 13 Event_Alarm on node 1
+time = 14 Event_Alarm on node 2
+time = 14 Event_Alarm on node 1
+time = 15 Event_Alarm on node 2
+time = 15 Event_Alarm on node 1
+time = 16 Event_Alarm on node 2
+time = 16 Event_Alarm on node 1
+time = 17 Event_Alarm on node 2
+time = 17 Event_Alarm on node 1
+time = 18 Event_Alarm on node 2
+time = 18 Event_Alarm on node 1
+time = 19 Event_Alarm on node 2
+time = 19 Event_Alarm on node 1
+time = 20 Event_Alarm on node 2
+time = 20 Event_Alarm on node 1
+time = 20 Event_Alarm on node 1
+time = 20 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+time = 20 Event_Alarm on node 2
+time = 20 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+time = 20.01 Event_Recv_Pkt_On_Node 2 packet type is PING
+time = 20.01 Event_Recv_Pkt_On_Node 1 packet type is PING
+time = 20.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
+time = 20.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
+time = 20.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
+DEBUG: recv Pong old link
+time = 20.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: recv Pong old link
+time = 21 Event_Alarm on node 2
+time = 21 Event_Alarm on node 1
+time = 22 Event_Alarm on node 2
+time = 22 Event_Alarm on node 1
+time = 23 Event_Alarm on node 2
+time = 23 Event_Alarm on node 1
+time = 24 Event_Alarm on node 2
+time = 24 Event_Alarm on node 1
+time = 25 Event_Alarm on node 2
+time = 25 Event_Alarm on node 1
+time = 26 Event_Alarm on node 2
+time = 26 Event_Alarm on node 1
+time = 27 Event_Alarm on node 2
+time = 27 Event_Alarm on node 1
+time = 28 Event_Alarm on node 2
+time = 28 Event_Alarm on node 1
+time = 29 Event_Alarm on node 2
+time = 29 Event_Alarm on node 1
+time = 30 Event_Alarm on node 1
+time = 30 Event_Alarm on node 2
+time = 30 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+time = 30 Event_Alarm on node 1
+time = 30 Event_Alarm on node 2
+DEBUG: periodic_send_DV on router 2
+DEBUG: send DV on router 2
+time = 30 Event_Alarm on node 1
+DEBUG: periodic_send_DV on router 1
+DEBUG: send DV on router 1
+time = 30 Event_Alarm on node 2
+time = 30 Event_Xmit_Pkt_On_Link (2,1) packet type is DV
+time = 30 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+time = 30 Event_Xmit_Pkt_On_Link (1,2) packet type is DV
+time = 30.01 Event_Recv_Pkt_On_Node 2 packet type is PING
+time = 30.01 Event_Recv_Pkt_On_Node 2 packet type is DV
+time = 30.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
+time = 30.01 Event_Recv_Pkt_On_Node 1 packet type is DV
+time = 30.01 Event_Recv_Pkt_On_Node 1 packet type is PING
+time = 30.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
+time = 30.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
+DEBUG: recv Pong old link
+time = 30.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: recv Pong old link
+time = 31 Event_Alarm on node 2
+time = 31 Event_Alarm on node 1
+time = 32 Event_Alarm on node 2
+time = 32 Event_Alarm on node 1
+time = 33 Event_Alarm on node 2
+time = 33 Event_Alarm on node 1
+time = 34 Event_Alarm on node 2
+time = 34 Event_Alarm on node 1
+time = 35 Event_Alarm on node 2
+time = 35 Event_Alarm on node 1
+time = 36 Event_Alarm on node 2
+time = 36 Event_Alarm on node 1
+time = 37 Event_Alarm on node 2
+time = 37 Event_Alarm on node 1
+time = 38 Event_Alarm on node 2
+time = 38 Event_Alarm on node 1
+time = 39 Event_Alarm on node 2
+time = 39 Event_Alarm on node 1
+time = 40 Event_Alarm on node 1
+time = 40 Event_Alarm on node 2
+time = 40 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+time = 40 Event_Alarm on node 1
+time = 40 Event_Alarm on node 2
+time = 40 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+time = 40.01 Event_Recv_Pkt_On_Node 2 packet type is PING
+time = 40.01 Event_Recv_Pkt_On_Node 1 packet type is PING
+time = 40.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
+time = 40.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
+time = 40.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
+DEBUG: recv Pong old link
+time = 40.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: recv Pong old link
+time = 41 Event_Alarm on node 2
+time = 41 Event_Alarm on node 1
+time = 42 Event_Alarm on node 2
+time = 42 Event_Alarm on node 1
+time = 43 Event_Alarm on node 2
+time = 43 Event_Alarm on node 1
+time = 44 Event_Alarm on node 2
+time = 44 Event_Alarm on node 1
+time = 45 Event_Alarm on node 2
+time = 45 Event_Alarm on node 1
+time = 46 Event_Alarm on node 2
+DEBUG: check status >>> delete out-of-time dv entry
+DEBUG: send DV on router 2
+time = 46 Event_Alarm on node 1
+DEBUG: check status >>> delete out-of-time dv entry
+DEBUG: send DV on router 1
+time = 47 Event_Alarm on node 2
+time = 47 Event_Alarm on node 1
+time = 48 Event_Alarm on node 2
+time = 48 Event_Alarm on node 1
+time = 49 Event_Alarm on node 2
+time = 49 Event_Alarm on node 1
+time = 50 Event_Alarm on node 2
+time = 50 Event_Alarm on node 1
+time = 50 Event_Alarm on node 2
+time = 50 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+time = 50 Event_Alarm on node 1
+time = 50 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+time = 50.01 Event_Recv_Pkt_On_Node 1 packet type is PING
+Simulator has ended.

@@ -1,0 +1,150 @@
+***** Design *****
+1 Tables
+所有的table都使用unordered_map来储存
+Common:
+Port info table 
+key: port id
+entry: neighbor node id; cost(RTT); last update time(ms)
+
+Forwarding table
+key: destination node id
+entry：port id
+
+Distance Vector table
+key: destination node id
+entry: next hop(port id); cost(RTT ms); last update time(ms)
+简化了已经，不需要存所有的dv entry，只要存到某个destination的最优entry。
+ps：其实这样的话, DV table和forwarding table是可以合并的。
+->但是为了拓展方便，以及代码逻辑清楚起见，我还是保留吧。
+->最后删了forwarding table
+再ps：只有简化了之后才能用map，每个destination只对应一个entry
+再ps：虽然说是简化了，但是这个link随时可能die，也算是增加了edge case
+
+
+2 定期检查
+每秒 1 check status of dv entry(>45s)； 2 check status of port info entry(>15s)
+每10s send ping packet to neighbor
+每30s send DV update packet (include all the entries of DV table in packet)
+
+lrh的解决方案是只设1s的alarm。我觉得如果这几个可以分开的话，也挺好的，逻辑比较清楚。老师的sampletest out里面，也是默认设了3个alarm，分别是1s， 10s， 30s。
+
+3 DV update packet
+每次DV entry或者port info有变化都要update DV，再send DV update packet。
+
+DV entry有变化的情况:
+	1 check status of dv entry
+		->有一些dv entry time out了
+		->删除相应dv entry
+	2 receive DV packet from neighbor，三件事要做
+		-> packet中有当前dv map没有的destination，增加dv entry
+		-> 当前dv map中有的destination，并且next hop就是发送来packet的port，但是packet中不包含这一destination了，删除该entry
+		-> packet和map中都有的destination，找出更小的cost，更新DV map entry 
+	
+Port entry有变化的情况：
+	1 check status of port info entry，一些port time out
+		->删除next hop是time-out port的dv entry
+	2 receive pong packet
+		case1: 新的link
+		case2: cost被update的link
+
+dv map里面没有infinite cost的情况，在update的时候就删掉了。
+也可以改成有infinite，但是就是send dv update packet的时候，这部分entry不能加进去。
+
+
+4 关于网络
+nodes之间的是固定的link，也许link会fail。links in the network is specified.
+
+一个port只对应一个neighbor node吗？？ 我在piazza上问了，先当做一一对应好了 @133
+-> "The bottomline is, once a link is defined in the simulator, it's always going to be associated with the same port numbers at both ends."
+
+
+5 poison reverse
+The node B told node C that   the cost of dvp entry to node A is infinit if the next hop is C.
+
+
+
+*****DEBUG & TEST*****
+1. compile error
+
+2 test1
+recv_PONG的时候，ping time不对
+->神奇的是ping一个对，一个不对 4 294 902 016 = 0xFFFF0100
+->packet改成了char payload[0]就行了。 不是很懂为什么不行。
+
+不停发dv
+->dv update packet内容不对
+->change uint16_t *payload_ptr to unsigned short *payload_ptr(好像不是这个问题)
+->entry_num计算有问题应该是
+
+abnormally delete dv after recv dv update
+-> node2当然没有destination为自己的entry，但是node1有，这种情况就不应该删除
+
+每1s check_staus之后都会send DV
+->send DV的flag设为true了一开始
+
+dv entry的上次更新时间，没有在来了pong之后更新(cost不变的情况下)。只有delete之后，收到pong才会重新添加。
+-> 改了下recv_pong里面的update dv
+->>> 问题又来了，这样的话尽管cost没变，但是dv又会发一遍。到底要不要在cost没变的情况下refresh neighbor的last_refreshed_time？
+->我看了下sample output，每次收完PONG不会再发DV。再修改回不更新time。
+->>> 50s的时候sample out没有发dv。那么他要求的就是，既要改last_refreshed_time又不发dv update。
+->暂时改成了这样，之后测试再看吧
+
+simpletest1 pass
+
+2 simpletest2
+收到相同的DV update packet，router还是会再发一次dv update包
+->改好了
+
+linkup之后，router2从router1收到新的dv entry,添加有问题
+->我的这里event顺序和标准输出不太一样，标准输出是1到2的ping丢了，我这里是2到1的ping丢了。
+-> 标准输出：2-1的ping通了，2的dv update，发向1（cost应该是是infinite，所以才没有更新）。但是注意了，1的dv update是之后ping通了2才发出去的。
+-> 我的输出：1-2的ping通了，2收到dv update之后，发现新的entry是从没ping通的port发来的。
+-> 那就ignore，直到下次ping通了，再更新port和dv，等到下次router1再发update再更新3相关的。
+
+
+3 simpletest3
+node2和node4在接收彼此的PONG之前就已经有了路径，但比较远。接收到PONG之后，DV_map没有更新成cost较小的路径。
+->测了一下发现，2和4之间的link还真的就是120，比绕路的60还大很多。
+
+die
+-> 400ms，4到3和3到4都没有ping通。但是在die之前，dv update都发出去了。
+-> 456ms, 3 4在删除超时的port entry，并删除对应entry。发DV update包。由于4之前的连接都通过3转发，4的DV_map为空。
+DEBUG: check status >>> delete out-of-time port entry
+DEBUG: send DV on router 4
+-> 1 收到update from 3， 删除4相关entry。由于poison reverse，1并不会更新到3的entry。
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+-> 2 收到update from 1，删除4,更新到3的时间。由于poison reverse，2并不会更新到1的entry。
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+TO...
+DEBUG: recv DV packet on router 2 from port 0
+DEBUG: recv DV update entry
+DEBUG: recv DV delete entry
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+-> 4收到2发来的update，更新entry。之所以2没有加入这里，是因为之前ping pong的时候，3还在dv map里面没有更新。
+这里还没有加入的原因是还没到下次ping的时候，并且由于poison reverse，2-4的cost被设为了Infinit。
+DEBUG: recv DV packet on router 4 from port 0
+DEBUG: recv DV new entry
+DEBUG: recv DV new entry
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 160
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 140
+-> 460ms ping, 4收到了2的ping，加入dv map。2也收到了4的ping，加入dv map。
+-> 1收到2的update，把4加入dv map。3收到1的update，把4加入dv map。
+-> 切换完成！！！
+
+这次linkup倒是在最前面。
+-> 4接到3的pong之后只改了3的cost。
+
+lrh的mytest1跑过了。和simpletest3一样都是在测linkdie，linkup。
+

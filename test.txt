@@ -1,0 +1,457 @@
+DV protocal are carefully tested. cost is RTT.
+Pass all the provided simpletests. Additional tests are writtern. The details of test are as follows.
+
+
+*************************Pass test1: simplified simpletest1*************************
+Almost the same as simpletest1. 
+Tests whether 
+1) ping and pong packets are being sent, and update DV_map 
+2) periodic updates are being sent
+3) data packets are being sent
+
+periodic_send_PING method and recv_PING method are tested. The updating port_status_map[port] part of partrecv_PONG method is tested.
+->Print and check the payload(time stamp). PING and PONG messages are sent and received correctly.
+
+The updating DV_map part of recv_PONG method is tested when new link comes. 
+-> Print the DV_map entry after updating. 
+
+send_dv method and the receive part of recv_dv method are tested.
+-> Print the recv_dv_map from dv update packet.
+
+The update part of recv_dv method when no changes should be made is tested.
+-> Printing the DV_map after update part.
+
+Alarms are tested.
+-> Check the number of alarm at certain time point. Special messages are also printed when alarm handler methods are called. All the three alarm are correctly set.
+
+
+
+*************************Pass test2: simpletest1*************************
+The output is the almost same as sameple output.
+
+
+
+
+***************************Pass test3: simpletest2***************************
+Tests whether 
+1) linkdying and linkcomingup works
+2) related update to DV_map works 
+
+DV_map at all the three router are correct after initial PING PONG.
+-> Print DV_map on each router every time DV update packet is sent.
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 40
+
+At 150.00，linkdying (1,2). Out-of-time entry are deleted from port_status_map and DV_map are updated.
+DEBUG: check status >>> delete out-of-time port entry
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 40
+time = 156 Event_Alarm on node 3
+time = 156 Event_Alarm on node 2
+...
+DEBUG: check status >>> delete out-of-time port entry
+DEBUG: send DV on router 2
+...
+time = 156 Event_Xmit_Pkt_On_Link (1,3) packet type is DV
+time = 156.02 Event_Recv_Pkt_On_Node 3 packet type is DV
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 40
+
+
+At 300.00 linkcomingup (1,2). DV_map at routers are reconstructed succesfully.
+time = 300 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
+Packet lost
+time = 300 Event_Link_Come_Up (1,2)
+...
+time = 300 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
+...
+time = 330 Event_Xmit_Pkt_On_Link (1,2) packet type is DV
+...
+time = 330.01 Event_Recv_Pkt_On_Node 2 packet type is DV
+DEBUG: recv DV new entry
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+
+
+
+
+
+
+
+*************************Pass test4: simpletest3***************************
+This test tests whether
+1) routes are correctly switched from best to second best when a link goes down in distance vector and link state
+2) routes are correctly switched back to best when a link comes back up.
+
+Routers are correctly set after the beginning PING-PONG packets and DV update packets.
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+And the link cost between 2 and 4 is 120.
+
+
+At 0.01, xmit (2,4). Data packet is not transmited since the forwarding table hasn't been set up yet.
+At 400.00 xmit (2,4). Data packet is succesfully received.
+time = 400 Event_Xmit_Data_Pkt source node 2 destination node 4 packet type is DATA
+...
+time = 400 Event_Xmit_Pkt_On_Link (2,1) packet type is DATA
+...
+time = 400.01 Event_Xmit_Pkt_On_Link (1,3) packet type is DATA
+...
+time = 400.02 Event_Xmit_Pkt_On_Link (3,4) packet type is DATA
+...
+time = 400.03 Event_Recv_Pkt_On_Node 4 packet type is DATA
+
+
+
+Routes are correctly switched from best to second best when a link goes down in distance vector and link state.
+450.00 linkdying (3,4). The link with cost 120 between 2 and 4 is used instead.
+time = 460.12 Event_Recv_Pkt_On_Node 4 packet type is PONG
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 120
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 160
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 140
+...
+time = 460.12 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 120
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+...
+time = 460.13 Event_Recv_Pkt_On_Node 1 packet type is DV
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 140
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+...
+time = 460.14 Event_Recv_Pkt_On_Node 3 packet type is DV
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 160
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+
+
+
+At 650.00, xmit (2,4) after (3,4) died. Data packet is succesfully received.
+time = 650 Event_Xmit_Data_Pkt source node 2 destination node 4 packet type is DATA
+time = 650 Event_Xmit_Pkt_On_Link (2,4) packet type is DATA
+time = 650.06 Event_Recv_Pkt_On_Node 4 packet type is DATA
+
+
+
+Routes are correctly switched back to best when a link comes back up.
+time = 750.02 Event_Recv_Pkt_On_Node 3 packet type is PONG
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+...
+time = 750.03 Event_Recv_Pkt_On_Node 1 packet type is DV
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+...
+time = 750.03 Event_Recv_Pkt_On_Node 4 packet type is DV
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+...
+time = 750.04 Event_Recv_Pkt_On_Node 2 packet type is DV
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+
+
+At 950.00, xmit (2,4). Data packet is succesfully sent to 4 via 2, 1, 3, 4.
+
+*************************Pass test5***************************
+This test tests whether
+1) routes are correctly switched when a link delay decreases.
+2) routes are correctly switched back when the link delay increases back to original value.
+The same topology with simpletest3.
+
+Initial DV_map:
+DEBUG: send DV on router 1
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 4
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+
+
+After 50.00 changedelay (2,4) 0.01
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+
+After 150.00 changedelay (2,4) 0.06
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: periodic_send_DV on router 4
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+
+
+*************************Pass test6***************************
+This test tests whether
+1) routes are correctly switched when a link delay decreases.
+2) routes are correctly switched when another link delay decreases.
+A more complex topology.
+
+Initial DV_map:
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 5 port id 0 cost 120
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 100
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 5 port id 1 cost 100
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 80
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 5 port id 2 cost 60
+DEBUG: send DV >>> neighbor id 4 port id 2 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 40
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 100
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 80
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 5 port id 1 cost 20
+DEBUG: send DV on router 5
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 120
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 100
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+
+
+After 50.00 changedelay (1,3) 0.01
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 5 port id 1 cost 80
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 5 port id 1 cost 100
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 80
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 5 port id 2 cost 60
+DEBUG: send DV >>> neighbor id 4 port id 2 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 40
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 80
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 5 port id 1 cost 20
+DEBUG: send DV on router 5
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 80
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 100
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+
+
+After 150.00 changedelay (1,5) 0.01
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 5 port id 2 cost 20
+DEBUG: send DV >>> neighbor id 4 port id 2 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 5 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: periodic_send_DV on router 3
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 5 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 2 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 40
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 5 port id 1 cost 20
+DEBUG: send DV on router 5
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+
+
+*************************Pass test7***************************
+simpletest3 with the loss probability of 0.2
+
+Before link(3, 4) die
+time = 30 Event_Alarm on node 1
+DEBUG: periodic_send_DV on router 1
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+...
+time = 30 Event_Alarm on node 4
+DEBUG: periodic_send_DV on router 4
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 1 cost 60
+DEBUG: send DV >>> neighbor id 1 port id 1 cost 40
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+...
+time = 30 Event_Alarm on node 3
+DEBUG: periodic_send_DV on router 3
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 20
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+...
+time = 30 Event_Alarm on node 2
+DEBUG: periodic_send_DV on router 2
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 60
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+
+
+
+After link(3, 4)die
+time = 460.12 Event_Recv_Pkt_On_Node 4 packet type is PONG
+DEBUG: recv Pong >>> new link
+DEBUG: send DV on router 4
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 120
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 160
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 140
+...
+time = 460.12 Event_Recv_Pkt_On_Node 2 packet type is PONG
+DEBUG: recv Pong >>> new link
+DEBUG: send DV on router 2
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 1 cost 120
+DEBUG: send DV >>> neighbor id 3 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20
+...
+time = 460.13 Event_Recv_Pkt_On_Node 1 packet type is DV
+DEBUG: recv DV packet on router 1 from port 0
+DEBUG: recv DV new entry
+DEBUG: send DV on router 1
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 140
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 20
+DEBUG: send DV >>> neighbor id 3 port id 1 cost 20
+...
+DEBUG: recv DV packet on router 3 from port 0
+DEBUG: recv DV update entry
+DEBUG: recv DV new entry
+DEBUG: send DV on router 3
+DEBUG: send DV >>> print DV map
+DEBUG: send DV >>> neighbor id 4 port id 0 cost 160
+DEBUG: send DV >>> neighbor id 2 port id 0 cost 40
+DEBUG: send DV >>> neighbor id 1 port id 0 cost 20

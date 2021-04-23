@@ -1,0 +1,15 @@
+[nodes]
+                                                                                                                                                                                                     
+1 2 
+                                                                                                                                                                                                     
+[links]
+                                                                                                                                                                                                     
+(1,2) delay 0.010 prob 0.0
+
+[events]
+ 
+1.00    xmit (2,1)                                                                                                                                                                                                    
+50.00 end
+
+
+                                                                                                                                                                                                     
